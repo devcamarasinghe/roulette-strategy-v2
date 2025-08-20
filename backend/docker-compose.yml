@@ -1,0 +1,35 @@
+# Docker Compose for Roulette Strategy Platform
+# Your friend runs: docker-compose up
+version: '3.8'
+
+services:
+  # Customer Service (Python FastAPI)
+  user-service:
+    image: user-service:v2
+    container_name: user-service
+    ports:
+      - "8001:8001"
+    networks:
+      - roulette-network
+    restart: unless-stopped
+
+  # Train Service (Go API Gateway)  
+  api-gateway:
+    image: api-gateway:latest
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - user-service
+    networks:
+      - roulette-network
+    restart: unless-stopped
+
+networks:
+  roulette-network:
+    driver: bridge
+
+# Usage Instructions:
+# 1. docker-compose up -d (start all services)
+# 2. Visit: http://localhost:8080
+# 3. docker-compose down (stop all services)
