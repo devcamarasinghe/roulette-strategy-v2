@@ -3,19 +3,37 @@
 version: '3.8'
 
 services:
+  # Database Service (PostgreSQL)
+  database:
+    image: postgres:15
+    container_name: postgres-db
+    environment:
+      POSTGRES_DB: roulette_db
+      POSTGRES_USER: roulette_user
+      POSTGRES_PASSWORD: roulette_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - roulette-network
+    restart: unless-stopped
+
   # Customer Service (Python FastAPI)
   user-service:
     image: user-service:v2
     container_name: user-service
     ports:
       - "8001:8001"
+    depends_on:
+      - database
     networks:
       - roulette-network
     restart: unless-stopped
 
   # Train Service (Go API Gateway)  
   api-gateway:
-    image: api-gateway:latest
+    image: api-gateway:test
     container_name: api-gateway
     ports:
       - "8080:8080"
@@ -28,6 +46,10 @@ services:
 networks:
   roulette-network:
     driver: bridge
+
+# Docker volumes for persistent data
+volumes:
+  postgres_data:
 
 # Usage Instructions:
 # 1. docker-compose up -d (start all services)
